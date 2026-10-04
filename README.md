@@ -5,11 +5,23 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Skill: Agent-Ready](https://img.shields.io/badge/Skill-Agent--Ready-success.svg)](.agents/skills/causal-pipeline-tracing/SKILL.md)
 
-Empirical research on multi-turn repository navigation and cross-tier fault localization reveals a fundamental bottleneck in AI-assisted software engineering: **speculative cross-tier exploration**.
-
-When an AI coding assistant is tasked with resolving an issue from a symptom description and reproduction logs in a full-stack codebase (UI state machines, postMessage bridges, client outbox queues, network transport, and backend microservices), standard unstructured console logs and verbose JSON dumps force the agent into costly, wandering investigations—opening unrelated backend files when a defect is in client debounce logic, or rewriting client state when the backend dropped an attribute.
-
-**Causal Numbered Pipeline Traces** solve this by formatting execution paths as deterministic, numbered state transitions (`1 -> 2 -> 3a -> 4 [FAIL] reason=...`). The numbered sequence acts as a **formal proof of failure**, enabling LLM coding agents to pinpoint root causes on their first pass with **zero exploratory detours**.
+> [!IMPORTANT]
+> ### ⚡ TL;DR
+> * **The Problem**: AI coding assistants waste 50%+ of their context and tokens wandering through unrelated files when debugging async queues, event loops, and cross-tier microservices with messy console logs or massive JSON dumps.
+> * **The Solution**: Instrument asynchronous pipelines with **Causal Numbered Pipeline Traces**:
+>   ```text
+>   [OUTBOX-TRACE] 1 -> 2 -> 3b -> 4 [FAIL] reason=unhandled-4xx-inFlight-not-cleared | entityId=doc-123 | inFlight=true
+>   ```
+> * **The Proven Stats**:
+>   * 🔻 **50% to 56.8% token drop** on concurrency bugs (queue deadlocks: 2,294 vs 5,306 tokens; delta overwrites: 2,758 vs 5,580 tokens).
+>   * ⚡ **19.5s mean diagnostic latency** (13.7% faster than JSON, 10.1% faster than unstructured console logs).
+>   * 🎯 **100% 1st-pass layer accuracy & 0 exploratory detours**: The numbered sequence acts as a formal proof of failure.
+> * **The Golden Rule**: Constrain reproduction logs to a bounded window of **< 300 lines**.
+> * **Universal Setup**:
+>   * **Antigravity**: Install the skill into `.agents/skills/causal-pipeline-tracing/`
+>   * **Claude Code**: Paste `integrations/claude-code/CLAUDE.md` into your root `CLAUDE.md`
+>   * **OpenAI Codex / Copilot**: Paste `integrations/codex/CODEX.md` into your root `AGENTS.md`
+>   * **One-line installer**: `bash .agents/skills/causal-pipeline-tracing/scripts/install_skill.sh --all /path/to/project`
 
 ---
 
