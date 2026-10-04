@@ -125,37 +125,91 @@ causal-pipeline-logging/
 │   └── scripts/
 │       ├── verify_traces.py                   # CLI tool to lint and validate trace conformance
 │       └── install_skill.sh                   # Helper script to install into any repository
+└── integrations/                              # Drop-in rules & prompts for other agents
+    ├── claude-code/CLAUDE.md                  # Drop-in config for Anthropic Claude Code
+    └── codex/CODEX.md                         # Drop-in rules for OpenAI Codex, GPT-4/5 & Copilot
 ```
 
 ---
 
 ## 🚀 How to Add This Skill to Your AI Agent
 
-You can add this skill to **any AI coding assistant** (Antigravity, Claude Code, Cursor, Copilot Workspace, Windsurf, or custom LLM tooling).
+This skill is designed for cross-agent compatibility and can be used immediately with **Claude Code**, **OpenAI Codex / Copilot**, and **Antigravity**.
 
-### Option 1: Automatic Install via Script
+### Option 1: Automatic Multi-Agent Installation via Script
 
-Run the installation script to copy the skill into your target project:
+Use `install_skill.sh` to configure any target repository:
 
 ```bash
-# In your target project root:
-curl -fsSL https://raw.githubusercontent.com/.../install_skill.sh | bash
-# Or run locally from this repository:
-bash .agents/skills/causal-pipeline-tracing/scripts/install_skill.sh /path/to/your/project
+# In your target project:
+bash /path/to/causal-pipeline-logging/.agents/skills/causal-pipeline-tracing/scripts/install_skill.sh --all /path/to/your/project
+```
+Flags available:
+- `--all`: Installs the skill and sets up guidelines for Claude Code (`CLAUDE.md`) and Codex (`AGENTS.md`).
+- `--claude`: Installs the skill and generates Claude Code instructions.
+- `--codex`: Installs the skill and generates OpenAI Codex / Copilot instructions.
+
+---
+
+### Option 2: Claude Code Integration (`CLAUDE.md`)
+
+[Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code) automatically reads `CLAUDE.md` from the root of your project.
+
+1. Copy or append [`integrations/claude-code/CLAUDE.md`](integrations/claude-code/CLAUDE.md) into your repository's root `CLAUDE.md`:
+
+```markdown
+## Logging & Diagnostics: Causal Pipeline Tracing
+
+When writing, refactoring, or diagnosing asynchronous code, queues, or state machines:
+- Emit Causal Numbered Pipeline Traces: `[<SUBSYSTEM>-TRACE] <sequence> [<STATUS>] reason=<kebab-reason> | <key>=<value>`
+- Happy path: `1 -> 2 -> 3 -> 4 [OK] | entityId=doc-123 | rev=2`
+- Branch/Failure path: `1 -> 2 -> 3b -> 4 [FAIL] reason=unhandled-4xx-inFlight-not-cleared | entityId=doc-123 | inFlight=true`
+- Never dump raw multi-KB JSON bodies; print only 2–4 scalar state variables.
+- Bound reproduction logs to <300 lines via clear-and-reproduce sessions.
+- Reference specification: `.agents/skills/causal-pipeline-tracing/references/spec.md`
+- Validate with: `python3 .agents/skills/causal-pipeline-tracing/scripts/verify_traces.py <log_file>`
 ```
 
-### Option 2: Project-Level Skill Configuration (Recommended for Antigravity)
+2. Invoke Claude Code:
+```bash
+claude "Review our outbox queue and instrument it with Causal Numbered Pipeline Traces per CLAUDE.md"
+```
 
-Place the skill inside your project's `.agents/skills/` directory:
+---
+
+### Option 3: OpenAI Codex & Assistant Integration (`AGENTS.md` / System Prompt)
+
+For **OpenAI Codex**, GPT-4/GPT-5 coding workflows, OpenAI Assistants, and GitHub Copilot:
+
+1. **Repository Instructions (`AGENTS.md` / `CODEX.md`)**:
+   Add [`integrations/codex/CODEX.md`](integrations/codex/CODEX.md) to your repository root as `AGENTS.md` (or `.github/copilot-instructions.md`).
+
+2. **System / Developer Prompt**:
+   If using the OpenAI API or custom GPTs, inject this developer instruction:
+   ```text
+   When writing or refactoring asynchronous logic, queues, or state machines, you MUST instrument all operations with Causal Numbered Pipeline Traces:
+   - Format: [<SUBSYSTEM>-TRACE] 1 -> 2 -> 3b -> 4 [STATUS] reason=<reason-code> | key=value
+   - Output [OK] on success; output [FAIL] reason=<kebab-case-code> on failure.
+   - Limit state context to 2-4 scalar values; never dump large JSON objects.
+   - Constrain test reproduction logs to <300 lines.
+   ```
+
+3. **Sample Prompt for Codex**:
+   > *"Analyze this outbox retry loop. Refactor its logging to follow Causal Numbered Pipeline Tracing with monotonic sequence numbers, branch suffixes (3a, 3b), and explicit reason codes on failure."*
+
+---
+
+### Option 4: Antigravity Project Skill
+
+Place the skill inside `.agents/skills/`:
 
 ```bash
 mkdir -p /path/to/your/project/.agents/skills/
 cp -r .agents/skills/causal-pipeline-tracing /path/to/your/project/.agents/skills/
 ```
 
-Once installed, your AI agent will automatically detect the skill whenever you prompt it:
-
-> *"Enhance our asynchronous pipeline and queue logging using the causal-pipeline-tracing skill to improve AI fault localization."*
+Then prompt your assistant:
+> *"Use the causal-pipeline-tracing skill to audit our asynchronous event pipelines and enhance our logging."*
 
 ---
 
