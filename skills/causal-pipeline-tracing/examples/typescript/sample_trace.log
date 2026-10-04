@@ -1,0 +1,4 @@
+[OUTBOX-PIPELINE-TRACE] 1 -> 2b -> 3 -> 3b -> 4 -> 5a -> 6 [OK] | entityId=doc-891 | rev=1 | queueDepth=2
+[OUTBOX-PIPELINE-TRACE] 1 -> 2a [ABORT] reason=concurrency-lock-held | entityId=doc-891 | queueDepth=2 | inFlight=true
+[OUTBOX-PIPELINE-TRACE] 1 -> 2b -> 3 -> 3b -> 4 -> 5b [FAIL] reason=unhandled-4xx-inFlight-not-cleared | entityId=doc-891 | status=409 | queueDepth=1 | inFlight=true
+[OUTBOX-PIPELINE-TRACE] 1 -> 2a [ABORT] reason=concurrency-lock-held | entityId=doc-892 | queueDepth=1 | inFlight=true

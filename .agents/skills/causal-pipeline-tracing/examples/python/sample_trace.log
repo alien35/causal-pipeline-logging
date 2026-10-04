@@ -1,0 +1,3 @@
+[TASK-WORKER-TRACE] 1 -> 2a [ABORT] reason=duplicate-job-discarded | jobId=job-100
+[TASK-WORKER-TRACE] 1 -> 2b -> 3 -> 3b -> 4 [FAIL] reason=revision-inversion-detected | jobId=job-101 | entityId=entity-42 | incomingRev=4 | currentRev=5
+[TASK-WORKER-TRACE] 1 -> 2b -> 3 -> 4 -> 5 [OK] | jobId=job-102 | entityId=entity-42 | newRev=7
